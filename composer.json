@@ -1,0 +1,20 @@
+{
+    "name": "cognito/auspost_pac",
+    "type": "library",
+    "description": "Australia Post PAC API",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Josh Marshall",
+            "email": "josh@jmarshall.com.au"
+        }
+    ],
+    "require": {
+        "php": ">=7.2"
+    },
+    "autoload": {
+        "psr-4": {
+			"Cognito\\AuspostPAC\\": "src/"
+		}
+    }
+}
