@@ -12,8 +12,7 @@ use Exception;
  */
 class AuspostPAC {
 
-	private $api_key        = null;
-	private $test_mode      = null;
+	private $api_key = null;
 
 	const API_SCHEME = 'https://';
 	const API_HOST   = 'digitalapi.auspost.com.au';
@@ -21,11 +20,9 @@ class AuspostPAC {
 	/**
 	 *
 	 * @param string $api_key The AusPost API Key
-	 * @param bool $test_mode Whether to use test mode or not
 	 */
-	public function __construct($api_key, $test_mode = false) {
+	public function __construct($api_key) {
 		$this->api_key = $api_key;
-		$this->test_mode = $test_mode;
 	}
 
 	/**
@@ -37,7 +34,7 @@ class AuspostPAC {
 	public function getParcelSizes() {
 		$data = json_decode($this->sendGetRequest('/postage/parcel/domestic/size.json' . $this->account_number), true);
 		$parcels = [];
-		foreach ($data as $item) {
+		foreach ($data['sizes']['size'] as $item) {
 			$parcels[] = new ParcelSize($item);
 		}
 
@@ -45,65 +42,26 @@ class AuspostPAC {
 	}
 
 	/**
+	 * Start point of a quote
+	 * @return Quote
+	 */
+	public function startQuote() {
+		return new Quote($this);
+	}
+
+	/**
 	 * Sends an HTTP GET request to the API.
 	 *
 	 * @param string $action the API action component of the URI
-	 *
+	 * @param array $data optional key => value data to send in the url
+	 * @return string raw body data
 	 * @throws Exception on error
 	 */
-	private function sendGetRequest($action, $data = []) {
-		return $this->sendRequest($action, $data, 'GET');
-	}
-
-	/**
-	 * Sends an HTTP POST request to the API.
-	 *
-	 * @param string $action the API action component of the URI
-	 * @param array  $data   assoc array containing the data to send
-	 *
-	 * @throws Exception on error
-	 */
-	private function sendPostRequest($action, $data) {
-		return $this->sendRequest($action, $data, 'POST');
-	}
-
-	/**
-	 * Sends an HTTP PUT request to the API.
-	 *
-	 * @param string $action the API action component of the URI
-	 * @param array  $data   assoc array containing the data to send
-	 *
-	 * @throws Exception on error
-	 */
-	private function sendPutRequest($action, $data) {
-		return $this->sendRequest($action, $data, 'PUT');
-	}
-
-	/**
-	 * Sends an HTTP DELETE request to the API
-	 *
-	 * @param string $action
-	 * @param mixed $data
-	 * @return void
-	 * @throws \Exception
-	 */
-	private function sendDeleteRequest($action, $data) {
-		return $this->sendRequest($action, $data, 'DELETE');
-	}
-
-	/**
-	 * Sends an HTTP POST request to the API.
-	 *
-	 * @param string $action the API action component of the URI
-	 * @param array  $data   assoc array containing the data to send
-	 * @param string $type   GET, POST, PUT, DELETE
-	 *
-	 * @throws Exception on error
-	 */
-	private function sendRequest($action, $data, $type) {
-		$encoded_data = $data ? json_encode($data) : '';
-
+	public function sendGetRequest($action, $data = []) {
 		$url = self::API_SCHEME . self::API_HOST . $action;
+		if ($data) {
+			$url .= '?' . http_build_query($data);
+		}
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);

@@ -17,8 +17,12 @@ class ParcelSize {
     public $code = '';
     public $name = '';
     public $value = '';
+    public $raw_details = [];
 
     public function __construct($details) {
+        foreach ($details as $key => $data) {
+            $this->$key = $data;
+        }
         $this->raw_details = $details;
     }
 }
